@@ -8,7 +8,7 @@ class Word2VecServer(RPCServer):
         super(Word2VecServer, self).__init__(*args, **kwargs)
         self.model = gensim.models.Word2Vec.load_word2vec_format(kwargs['model_file'], binary=True)
 
-    def most_similar(self, positive=[], negative=[], topn=10, restrict_vocab=None):
+    def most_similar(self, positive, negative, topn, restrict_vocab):
         return self.model.most_similar(positive=positive, negative=negative, topn=topn, restrict_vocab=restrict_vocab)
 
     def doesnt_match(self, words):
@@ -18,7 +18,7 @@ class Word2VecServer(RPCServer):
         return self.model.similarity(w1, w2)
 
     def vector(self, word):
-        return self.model[word]
+        return self.model[word].tolist()
 
 
 def parse_args():
