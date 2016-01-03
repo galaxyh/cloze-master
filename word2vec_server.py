@@ -20,6 +20,9 @@ class Word2VecServer(RPCServer):
     def vector(self, word):
         return self.model[word].tolist()
 
+    def exist(self, word):
+        return word in self.model
+
 
 def parse_args():
     from optparse import OptionParser
