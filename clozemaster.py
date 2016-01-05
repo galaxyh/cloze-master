@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
+import codecs
 import numpy as np
 import scipy.spatial.distance as dist
 from mprpc import RPCClient
-from nltk.tokenize import sent_tokenize, WhitespaceTokenizer
+from rcdata import RCData
 
 
 def parse_args():
@@ -13,8 +16,8 @@ def parse_args():
                  dest='server_port', type='int', default='1979')
     p.add_option('-d', '--embedding_dim', action='store',
                  dest='embedding_dim', type='int', default='300')
-    p.add_option('-v', '--verbose', action='store_true',
-                 dest='verbose', default=False)
+    p.add_option('-v', '--verbose', action='store',
+                 dest='verbose', type='int', default='0')
     p.add_option('-a', '--article', action='store',
                  dest='article', type='string', default='')
     p.add_option('-l', '--article_list', action='store',
@@ -29,29 +32,6 @@ def nonblank_lines(source):
         line = l.strip()
         if line:
             yield line
-
-
-def load_article(filename):
-    """Load and parse source article
-
-    :param filename:
-    :return: (raw_sentences, tokenized_sentences), (raw_question, tokenized_question), correct_answer
-    """
-    with open(filename) as f:
-        f.readline()  # Discard article source URL
-        f.readline()  # Read out separation line
-
-        text = f.readline()
-        sentences_raw = sent_tokenize(text)
-        sentences_tok = [WhitespaceTokenizer().tokenize(sent) for sent in sentences_raw]
-        f.readline()  # Read out separation line
-
-        question_raw = f.readline()
-        question_tok = WhitespaceTokenizer().tokenize(question_raw)
-        f.readline()  # Read out separation line
-
-        ans = f.readline()
-        return (sentences_raw, sentences_tok), (question_raw, question_tok), ans
 
 
 def vec_avg(sentence):
@@ -78,7 +58,7 @@ if __name__ == '__main__':
     options, remainder = parse_args()
 
     if options.article_list.strip():
-        articles = open(options.article_list.strip())
+        articles = codecs.open(options.article_list.strip(), 'r', encoding='utf8')
     elif options.article.strip():
         articles = [options.article.strip()]
     else:
@@ -91,24 +71,32 @@ if __name__ == '__main__':
     client = RPCClient(options.server_ip, options.server_port)
 
     for article in nonblank_lines(articles):
-        sentences, question, answer = load_article(article_dir + article)
+        data = RCData()
+        data.load_article(article_dir + article)
 
-        q_avg = vec_avg(question[1])
-        s_avg = [vec_avg(s) for s in sentences[1]]
+        q_avg = vec_avg(data.question.tokens)
+        s_avg = [vec_avg(s) for s in data.sentences.tokens]
         cos = [dist.cosine(q_avg, avg) for avg in s_avg]
-
-        fmt = '{:<4}{:<1.6f}  {}'
-        if options.verbose:
-            for i, (c, sent) in enumerate(zip(cos, sentences[0])):
-                print(fmt.format(i, c, sent))
-
-        print 'ARTICLE: ', article
-        print 'QUESTION:', question[0],
-        print 'ANSWER:  ', answer,
-
-        print 'GUESS:   ',
         min_dist = min(cos)
         min_idx = cos.index(min_dist)
-        print(fmt.format(min_idx, min_dist, sentences[0][min_idx]))
 
-        print
+        fmt = '{:<4}{:<1.6f}  {}'
+        if options.verbose > 0:
+            print 'ARTICLE  >', article
+            print 'URL      >', data.url
+            print 'QUESTION >', data.question.raw
+            print 'ANSWER   >', data.answer
+            print 'GUESS    >',
+            print fmt.format(min_idx, min_dist, data.sentences.raw[min_idx])
+            print
+
+        if options.verbose > 1:
+            for i, (c, sent) in enumerate(zip(cos, data.sentences.raw)):
+                print(fmt.format(i, c, sent))
+            print
+
+        fmt = '{},{},{},{}'
+        print fmt.format(1 if data.answer in data.sentences.tokens[min_idx] else 0,
+                         len([e for e in data.sentences.tokens[min_idx] if e.startswith('@entity')]),
+                         len(data.entities),
+                         article)
