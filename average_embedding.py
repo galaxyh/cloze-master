@@ -4,11 +4,11 @@ import codecs
 import numpy as np
 import scipy.spatial.distance as dist
 from mprpc import RPCClient
+from optparse import OptionParser
 from rcdata import RCData
 
 
 def parse_args():
-    from optparse import OptionParser
     p = OptionParser()
     p.add_option('-s', '--server_ip', action='store',
                  dest='server_ip', type='string', default='127.0.0.1')
