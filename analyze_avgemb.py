@@ -23,6 +23,10 @@ if __name__ == '__main__':
             avgemb_ev += (1.0 / int(record[1])) if int(record[1]) > 0 else 0
             random_ev += (1.0 / int(record[2])) if int(record[2]) > 0 else 0
 
-        print 'Expected value of correct answer'
-        print 'Average embedding = {.3f}'.format(avgemb_ev)
-        print 'Random select     = {.3f}'.format(random_ev)
+        print 'Total questions answered =', len(records)
+        print 'Expected value of correct answer:'
+        print 'Average embedding = {:<.3f}'.format(avgemb_ev)
+        print 'Random select     = {:<.3f}'.format(random_ev)
+        print 'Expected correct answer rate:'
+        print 'Average embedding = {:<.3f}'.format(avgemb_ev/len(records))
+        print 'Random select     = {:<.3f}'.format(random_ev/len(records))
