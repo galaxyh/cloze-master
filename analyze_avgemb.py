@@ -12,7 +12,7 @@ def parse_args():
 if __name__ == '__main__':
     options, remainder = parse_args()
 
-    if options.filename.strip():
+    if not options.filename.strip():
         quit()
 
     with codecs.open(options.filename.strip(), 'r', encoding='utf8') as f:
