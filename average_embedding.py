@@ -77,8 +77,14 @@ if __name__ == '__main__':
         q_avg = vec_avg(data.question.tokens)
         s_avg = [vec_avg(s) for s in data.sentences.tokens]
         cos = [dist.cosine(q_avg, avg) for avg in s_avg]
-        min_dist = min(cos)
-        min_idx = cos.index(min_dist)
+
+        min_dist = float('inf')
+        min_idx = 0
+        for i, (c, s) in enumerate(zip(cos, data.sentences.tokens)):
+            if any(t.startswith('@entity') for t in s):
+                if c < min_dist:
+                    min_dist = c
+                    min_idx = i
 
         fmt = '{:<4}{:<1.6f}  {}'
         if options.verbose > 0:
