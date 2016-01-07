@@ -9,6 +9,7 @@ def parse_args():
                  dest='filename', type='string', default='')
     return p.parse_args()
 
+
 if __name__ == '__main__':
     options, remainder = parse_args()
 
@@ -33,9 +34,10 @@ if __name__ == '__main__':
 
         print 'Total questions answered =', num_question
         print 'Correct candidate sentences =', correct_candidate
-        print 'Correct candidate sentences rate = {:>1.3f}'.format(correct_candidate / num_question)
-        print 'Average number of entities in a question = {:>1.3f}'.format(num_all_entity / num_question)
-        print 'Average number of entities in a candidate sentence = {:>1.3f}'.format(num_candidate_entity / num_question)
+        print 'Correct candidate sentences rate = {:>1.3f}'.format(float(correct_candidate) / num_question)
+        print 'Average number of entities in a question = {:>1.3f}'.format(float(num_all_entity) / num_question)
+        print 'Average number of entities in a candidate sentence = {:>1.3f}'.format(
+            float(num_candidate_entity) / num_question)
         print
         print 'Expected value of correct answering:'
         print 'Average WE = {:>4.3f}'.format(avgwe_ev)
