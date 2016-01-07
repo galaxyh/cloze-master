@@ -16,21 +16,25 @@ if __name__ == '__main__':
         quit()
 
     with codecs.open(options.filename.strip(), 'r', encoding='utf8') as f:
-        question_count = 0
-        avgemb_ev = 0
+        num_question = 0
+        correct_candidate = 0
+        avgwe_ev = 0
         random_ev = 0
         records = csv.reader(f, delimiter=',')
         for record in records:
-            question_count += 1
-            avgemb_ev += (1.0 / int(record[1])) if int(record[1]) > 0 else 0
+            num_question += 1
+            correct_candidate += 1 if int(record[0]) == 1 else 0
+            avgwe_ev += (1.0 / int(record[1])) if int(record[1]) > 0 else 0
             random_ev += (1.0 / int(record[2])) if int(record[2]) > 0 else 0
 
-        print 'Total questions answered =', question_count
+        print 'Total questions answered =', num_question
+        print 'Correct candidate sentences =', correct_candidate
+        print 'Correct candidate sentences rate = {:>1.3f}'.format(float(correct_candidate) / num_question)
         print
-        print 'Expected value of correct answer:'
-        print 'Average embedding = {:>4.3f}'.format(avgemb_ev)
+        print 'Expected value of correct answering:'
+        print 'Average WE = {:>4.3f}'.format(avgwe_ev)
         print 'Random select     = {:>4.3f}'.format(random_ev)
         print
-        print 'Expected correct answer rate:'
-        print 'Average embedding = {:>1.3f}'.format(avgemb_ev/question_count)
-        print 'Random select     = {:>1.3f}'.format(random_ev/question_count)
+        print 'Expected correct answering rate:'
+        print 'Average WE = {:>1.3f}'.format(avgwe_ev / num_question)
+        print 'Random select     = {:>1.3f}'.format(random_ev / num_question)
