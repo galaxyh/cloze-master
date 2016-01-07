@@ -27,7 +27,7 @@ if __name__ == '__main__':
             num_question += 1
             correct_candidate += int(record[0])
             num_candidate_entity += int(record[1])
-            num_all_entity += record[2]
+            num_all_entity += int(record[2])
             avgwe_ev += (1.0 / int(record[1])) if int(record[1]) > 0 else 0
             random_ev += (1.0 / int(record[2])) if int(record[2]) > 0 else 0
 
