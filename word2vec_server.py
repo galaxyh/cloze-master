@@ -1,27 +1,37 @@
-import gensim, logging
-from gevent.server import StreamServer
-from mprpc import RPCServer
+import multiprocessing
+import logging
 
 
-class Word2VecServer(RPCServer):
-    def __init__(self, *args, **kwargs):
-        super(Word2VecServer, self).__init__(*args, **kwargs)
-        self.model = gensim.models.Word2Vec.load_word2vec_format(kwargs['model_file'], binary=True)
+def run_word2vec_server():
+    import gensim
+    from gevent.server import StreamServer
+    from mprpc import RPCServer
 
-    def most_similar(self, positive, negative, topn, restrict_vocab):
-        return self.model.most_similar(positive=positive, negative=negative, topn=topn, restrict_vocab=restrict_vocab)
+    class Word2VecServer(RPCServer):
+        def __init__(self, *args, **kwargs):
+            super(Word2VecServer, self).__init__(*args, **kwargs)
+            self.model = gensim.models.Word2Vec.load_word2vec_format(kwargs['model_file'], binary=True)
 
-    def doesnt_match(self, words):
-        return self.model.doesnt_match(words)
+        def most_similar(self, positive, negative, topn, restrict_vocab):
+            return self.model.most_similar(positive=positive, negative=negative, topn=topn, restrict_vocab=restrict_vocab)
 
-    def similarity(self, w1, w2):
-        return self.model.similarity(w1, w2)
+        def doesnt_match(self, words):
+            return self.model.doesnt_match(words)
 
-    def vector(self, word):
-        return self.model[word].tolist()
+        def similarity(self, w1, w2):
+            return self.model.similarity(w1, w2)
 
-    def exist(self, word):
-        return word in self.model
+        def vector(self, word):
+            return self.model[word].tolist()
+
+        def exist(self, word):
+            return word in self.model
+
+    options, remainder = parse_args()
+    server = StreamServer((options.server_ip, options.server_port), Word2VecServer(model_file=options.model_file))
+    logger.info('Word2Vec server started at %s:%d', options.server_ip, options.server_port)
+    logger.info('Word2Vec model file name: %s', options.model_file)
+    server.serve_forever()
 
 
 def parse_args():
@@ -40,8 +50,23 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     logger = logging.getLogger('word2vec_server')
 
-    options, remainder = parse_args()
-    server = StreamServer((options.server_ip, options.server_port), Word2VecServer(model_file=options.model_file))
-    logger.info('Word2Vec server started at %s:%d', options.server_ip, options.server_port)
-    logger.info('Word2Vec model file name: %s', options.model_file)
-    server.serve_forever()
+    daemon = multiprocessing.Process(target=run_word2vec_server)
+    daemon.daemon = True
+    daemon.start()
+
+    print
+    print 'Enter \'quit\' to stop server.'
+    print
+
+    while True:
+        s = raw_input('Word2Vec > ')
+        if s and s.lower().strip() == 'quit':
+            break
+
+    print
+    daemon.terminate()
+    print 'Stopping server...'
+    print
+    daemon.join()
+    print 'Server stopped'
+    print
