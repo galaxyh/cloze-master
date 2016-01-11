@@ -78,22 +78,28 @@ if __name__ == '__main__':
         s_avg = [vec_avg(s) for s in data.sentences.tokens]
         cos = [dist.cosine(q_avg, avg) for avg in s_avg]
 
-        min_dist = float('inf')
-        min_idx = 0
+        min_dist_1st = float('inf')
+        min_idx_1st = 0
+        min_dist_2nd = float('inf')
+        min_idx_2nd = 0
         for i, (c, s) in enumerate(zip(cos, data.sentences.tokens)):
             if any(t.startswith('@entity') for t in s):
-                if c < min_dist:
-                    min_dist = c
-                    min_idx = i
+                if c < min_dist_1st:
+                    min_dist_2nd = min_dist_1st
+                    min_idx_2nd = min_idx_1st
+                    min_dist_1st = c
+                    min_idx_1st = i
 
         fmt = '{:<4}{:<1.6f}  {}'
         if options.verbose > 0:
-            print 'ARTICLE  >', article
-            print 'URL      >', data.url
-            print 'QUESTION >', data.question.raw
-            print 'ANSWER   >', data.answer
-            print 'GUESS    >',
-            print fmt.format(min_idx, min_dist, data.sentences.raw[min_idx])
+            print 'ARTICLE     >', article
+            print 'URL         >', data.url
+            print 'QUESTION    >', data.question.raw
+            print 'ANSWER      >', data.answer
+            print 'GUESS TOP 1 >',
+            print fmt.format(min_idx_1st, min_dist_1st, data.sentences.raw[min_idx_1st])
+            print 'GUESS TOP 2 >',
+            print fmt.format(min_idx_2nd, min_dist_2nd, data.sentences.raw[min_idx_2nd])
             print
 
         if options.verbose > 1:
@@ -102,7 +108,9 @@ if __name__ == '__main__':
             print
 
         fmt = '{},{},{},{}'
-        print fmt.format(1 if data.answer in data.sentences.tokens[min_idx] else 0,
-                         len([e for e in data.sentences.tokens[min_idx] if e.startswith('@entity')]),
+        print fmt.format(1 if data.answer in data.sentences.tokens[min_idx_1st] else 0,
+                         1 if data.answer in data.sentences.tokens[min_idx_2nd] else 0,
+                         len([e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')]),
+                         len([e for e in data.sentences.tokens[min_idx_2nd] if e.startswith('@entity')]),
                          len(data.entities),
                          article)
