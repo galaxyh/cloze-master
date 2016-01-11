@@ -32,6 +32,8 @@ if __name__ == '__main__':
             avgwe_ev += (1.0 / int(record[1])) if int(record[1]) > 0 else 0
             random_ev += (1.0 / int(record[2])) if int(record[2]) > 0 else 0
 
+        print options.filename.strip()
+        print '--'
         print 'Total questions answered =', num_question
         print 'Correct candidate sentences =', correct_candidate
         print 'Correct candidate sentences rate = {:>1.3f}'.format(float(correct_candidate) / num_question)
@@ -41,8 +43,8 @@ if __name__ == '__main__':
         print
         print 'Expected value of correct answering:'
         print 'Average WE = {:>4.3f}'.format(avgwe_ev)
-        print 'Random select     = {:>4.3f}'.format(random_ev)
+        print 'Random select = {:>4.3f}'.format(random_ev)
         print
         print 'Expected correct answering rate:'
         print 'Average WE = {:>1.3f}'.format(avgwe_ev / num_question)
-        print 'Random select     = {:>1.3f}'.format(random_ev / num_question)
+        print 'Random select = {:>1.3f}'.format(random_ev / num_question)
