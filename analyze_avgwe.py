@@ -41,13 +41,13 @@ if __name__ == '__main__':
         print 'Average number of entities in an article = {:>1.3f}'.format(float(num_all_entity) / num_question)
         print 'Correct candidate sentences (top 1) =', correct_candidate_top1
         print 'Correct candidate sentence rate (top 1) = {:>1.3f}'.format(
-            float(correct_candidate_top1) / num_question)
+                float(correct_candidate_top1) / num_question)
         print 'Average number of entities in a candidate sentence (top 1) = {:>1.3f}'.format(
                 float(num_candidate_entity_top1) / num_question)
         print
         print 'Correct candidate sentences (top 2) =', correct_candidate_top2
         print 'Correct candidate sentence rate (top 2) = {:>1.3f}'.format(
-            float(correct_candidate_top2) / num_question)
+                float(correct_candidate_top2) / num_question)
         print
         print 'Expected value of correct answering (top 1):'
         print 'Average WE = {:>4.3f}'.format(avgwe_ev)
