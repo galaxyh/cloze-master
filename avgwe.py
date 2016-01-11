@@ -107,7 +107,7 @@ if __name__ == '__main__':
                 print(fmt.format(i, c, sent))
             print
 
-        fmt = '{},{},{},{}'
+        fmt = '{},{},{},{},{},{}'
         print fmt.format(1 if data.answer in data.sentences.tokens[min_idx_1st] else 0,
                          1 if data.answer in data.sentences.tokens[min_idx_2nd] else 0,
                          len([e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')]),
