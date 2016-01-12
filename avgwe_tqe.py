@@ -114,10 +114,10 @@ if __name__ == '__main__':
         c_entities_2nd_diff = c_entities_2nd - q_entities
 
         fmt = '{},{},{},{},{},{},{},{},{},{}'
-        print fmt.format(1 if data.answer in data.sentences.tokens[min_idx_1st] else 0,
-                         1 if data.answer in data.sentences.tokens[min_idx_2nd] else 0,
-                         len([e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')]),
-                         len([e for e in data.sentences.tokens[min_idx_2nd] if e.startswith('@entity')]),
+        print fmt.format(1 if data.answer in c_entities_1st else 0,
+                         1 if data.answer in c_entities_2nd else 0,
+                         len(c_entities_1st),
+                         len(c_entities_2nd),
                          1 if data.answer in c_entities_1st_diff else 0,
                          1 if data.answer in c_entities_2nd_diff else 0,
                          len(c_entities_1st_diff),
