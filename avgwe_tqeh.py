@@ -120,7 +120,7 @@ if __name__ == '__main__':
         if len(c_entities_intersect) > 0:
             candidates = c_entities_intersect
         elif len(c_entities_1st_diff) > 0:
-            candidates = c_entities_intersect
+            candidates = c_entities_1st_diff
         else:
             candidates = c_entities_2nd_diff
 
