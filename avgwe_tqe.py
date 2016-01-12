@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Average word embedding trim question entities.
+"""
 
 import codecs
 import numpy as np

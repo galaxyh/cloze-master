@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Average word embedding.
+"""
 
 import codecs
 import numpy as np
