@@ -107,10 +107,13 @@ if __name__ == '__main__':
                 print(fmt.format(i, c, sent))
             print
 
+        c_entities_1st = {e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')}
+        c_entities_2nd = {e for e in data.sentences.tokens[min_idx_2nd] if e.startswith('@entity')}
+
         fmt = '{},{},{},{},{},{}'
-        print fmt.format(1 if data.answer in data.sentences.tokens[min_idx_1st] else 0,
-                         1 if data.answer in data.sentences.tokens[min_idx_2nd] else 0,
-                         len([e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')]),
-                         len([e for e in data.sentences.tokens[min_idx_2nd] if e.startswith('@entity')]),
+        print fmt.format(1 if data.answer in c_entities_1st else 0,
+                         1 if data.answer in c_entities_2nd else 0,
+                         len(c_entities_1st),
+                         len(c_entities_2nd),
                          len(data.entities),
                          article)
