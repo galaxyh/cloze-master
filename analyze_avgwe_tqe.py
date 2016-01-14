@@ -21,6 +21,7 @@ if __name__ == '__main__':
         correct_candidate_top1 = 0
         correct_candidate_top2 = 0
         num_candidate_entity_top1 = 0
+        num_candidate_entity_tqe_top1 = 0
         num_all_entity = 0
         avgwe_ev = 0
         random_ev = 0
@@ -31,7 +32,8 @@ if __name__ == '__main__':
             num_question += 1
             correct_candidate_top1 += int(record[0])
             correct_candidate_top2 += max(int(record[0]), int(record[1]))
-            num_candidate_entity_top1 += int(record[3])
+            num_candidate_entity_top1 += int(record[2])
+            num_candidate_entity_tqe_top1 += int(record[6])
             num_all_entity += int(record[4])
             avgwe_ev += (float(record[0]) / int(record[2])) if int(record[2]) > 0 else 0
             random_ev += (1.0 / int(record[8])) if int(record[8]) > 0 else 0
@@ -50,6 +52,8 @@ if __name__ == '__main__':
                 float(correct_candidate_top1) / num_question)
         print 'Average number of entities in a candidate sentence (top 1) = {:>1.3f}'.format(
                 float(num_candidate_entity_top1) / num_question)
+        print 'Average number of entities in a candidate sentence (top 1, tqe) = {:>1.3f}'.format(
+                float(num_candidate_entity_tqe_top1) / num_question)
         print
         print 'Correct candidate sentences (top 2) =', correct_candidate_top2
         print 'Correct candidate sentence rate (top 2) = {:>1.3f}'.format(
