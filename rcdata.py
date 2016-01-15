@@ -11,6 +11,8 @@ class RCData:
         self._question = _Text()
         self._answer = ''
         self._entities = []
+        self._num_words = 0
+        self._num_sentences = 0
 
     def load_article(self, filename):
         """Load and parse source article
@@ -25,6 +27,9 @@ class RCData:
             sentences_raw = sent_tokenize(text)
             sentences_tok = [WhitespaceTokenizer().tokenize(sent) for sent in sentences_raw]
             self._sentences = _Text(sentences_raw, sentences_tok)
+
+            self._num_sentences = len(sentences_raw)
+            self._num_words = sum([len(tokens) for tokens in sentences_tok])
 
             question_raw = lines[4].strip()
             question_tok = WhitespaceTokenizer().tokenize(question_raw)
@@ -53,6 +58,14 @@ class RCData:
     @property
     def entities(self):
         return self._entities
+
+    @property
+    def num_words(self):
+        return self._num_words
+
+    @property
+    def num_sentences(self):
+        return self._num_sentences
 
 
 class _Text:
