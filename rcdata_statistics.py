@@ -31,7 +31,7 @@ def nonblank_lines(source):
 def mp_worker(file_name):
     rcd = RCData()
     rcd.load_article(file_name)
-    return rcd
+    return rcd.num_words, rcd.num_sentences, len(rcd.entities)
 
 if __name__ == '__main__':
     options, remainder = parse_args()
@@ -55,11 +55,11 @@ if __name__ == '__main__':
     num_sentences = 0
     num_entities = 0
 
-    for data in pool.imap(mp_worker, [article_dir + a for a in nonblank_lines(articles)]):
+    for w, s, e in pool.imap(mp_worker, [article_dir + a for a in nonblank_lines(articles)]):
         num_articles += 1
-        num_words += data.num_words
-        num_sentences += data.num_sentences
-        num_entities += len(data.entities)
+        num_words += w
+        num_sentences += s
+        num_entities += e
 
     print 'Number of articles:', num_articles
     print 'Average number of words per article:    ', float(num_words) / num_articles
