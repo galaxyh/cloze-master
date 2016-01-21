@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+
 from nltk.tokenize import sent_tokenize, WhitespaceTokenizer
 
 
-class RCData:
+class Article:
     def __init__(self):
         self._url = ''
         self._sentences = _Text()
@@ -69,7 +70,7 @@ class RCData:
 
 
 class _Text:
-    def __init__(self, raw='', tokens=[]):
+    def __init__(self, raw='', tokens=None):
         self._raw = raw
         self._tokens = tokens
 

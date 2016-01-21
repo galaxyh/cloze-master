@@ -5,7 +5,8 @@
 import codecs
 import multiprocessing
 from optparse import OptionParser
-from rcdata import RCData
+
+from article import Article
 
 
 def parse_args():
@@ -29,13 +30,14 @@ def nonblank_lines(source):
 
 
 def mp_worker(file_name):
-    rcd = RCData()
+    rcd = Article()
     rcd.load_article(file_name)
     return rcd.num_words, rcd.num_sentences, len(rcd.entities)
 
 if __name__ == '__main__':
     options, remainder = parse_args()
 
+    articles = []
     if options.article_list.strip():
         articles = codecs.open(options.article_list.strip(), 'r', encoding='utf8')
     elif options.article.strip():

@@ -3,11 +3,13 @@
 """
 
 import codecs
+from optparse import OptionParser
+
 import numpy as np
 import scipy.spatial.distance as dist
 from mprpc import RPCClient
-from optparse import OptionParser
-from rcdata import RCData
+
+from rcdata.article import Article
 
 
 def parse_args():
@@ -59,6 +61,7 @@ def vec_avg(sentence):
 if __name__ == '__main__':
     options, remainder = parse_args()
 
+    articles = []
     if options.article_list.strip():
         articles = codecs.open(options.article_list.strip(), 'r', encoding='utf8')
     elif options.article.strip():
@@ -72,19 +75,19 @@ if __name__ == '__main__':
 
     client = RPCClient(options.server_ip, options.server_port)
 
-    for article in nonblank_lines(articles):
-        data = RCData()
-        data.load_article(article_dir + article)
+    for article_filename in nonblank_lines(articles):
+        article = Article()
+        article.load_article(article_dir + article_filename)
 
-        q_avg = vec_avg(data.question.tokens)
-        s_avg = [vec_avg(s) for s in data.sentences.tokens]
+        q_avg = vec_avg(article.question.tokens)
+        s_avg = [vec_avg(s) for s in article.sentences.tokens]
         cos = [dist.cosine(q_avg, avg) for avg in s_avg]
 
         min_dist_1st = float('inf')
         min_idx_1st = 0
         min_dist_2nd = float('inf')
         min_idx_2nd = 0
-        for i, (c, s) in enumerate(zip(cos, data.sentences.tokens)):
+        for i, (c, s) in enumerate(zip(cos, article.sentences.tokens)):
             if any(t.startswith('@entity') for t in s):
                 if c < min_dist_1st:
                     min_dist_2nd = min_dist_1st
@@ -94,24 +97,24 @@ if __name__ == '__main__':
 
         fmt = '{:<4}{:<1.6f}  {}'
         if options.verbose > 0:
-            print 'ARTICLE     >', article
-            print 'URL         >', data.url
-            print 'QUESTION    >', data.question.raw
-            print 'ANSWER      >', data.answer
+            print 'ARTICLE     >', article_filename
+            print 'URL         >', article.url
+            print 'QUESTION    >', article.question.raw
+            print 'ANSWER      >', article.answer
             print 'GUESS TOP 1 >',
-            print fmt.format(min_idx_1st, min_dist_1st, data.sentences.raw[min_idx_1st])
+            print fmt.format(min_idx_1st, min_dist_1st, article.sentences.raw[min_idx_1st])
             print 'GUESS TOP 2 >',
-            print fmt.format(min_idx_2nd, min_dist_2nd, data.sentences.raw[min_idx_2nd])
+            print fmt.format(min_idx_2nd, min_dist_2nd, article.sentences.raw[min_idx_2nd])
             print
 
         if options.verbose > 1:
-            for i, (c, sent) in enumerate(zip(cos, data.sentences.raw)):
+            for i, (c, sent) in enumerate(zip(cos, article.sentences.raw)):
                 print(fmt.format(i, c, sent))
             print
 
-        q_entities = {e for e in data.question.tokens if e.startswith('@entity')}
-        c_entities_1st = {e for e in data.sentences.tokens[min_idx_1st] if e.startswith('@entity')}
-        c_entities_2nd = {e for e in data.sentences.tokens[min_idx_2nd] if e.startswith('@entity')}
+        q_entities = {e for e in article.question.tokens if e.startswith('@entity')}
+        c_entities_1st = {e for e in article.sentences.tokens[min_idx_1st] if e.startswith('@entity')}
+        c_entities_2nd = {e for e in article.sentences.tokens[min_idx_2nd] if e.startswith('@entity')}
         c_entities_1st_diff = c_entities_1st - q_entities
         c_entities_2nd_diff = c_entities_2nd - q_entities
         c_entities_intersect = c_entities_1st_diff & c_entities_2nd_diff
@@ -125,7 +128,7 @@ if __name__ == '__main__':
             candidates = c_entities_2nd_diff
 
         fmt = '{},{},{},{}'
-        print fmt.format(1 if data.answer in candidates else 0,
+        print fmt.format(1 if article.answer in candidates else 0,
                          len(candidates),
-                         len(data.entities),
-                         article)
+                         len(article.entities),
+                         article_filename)
