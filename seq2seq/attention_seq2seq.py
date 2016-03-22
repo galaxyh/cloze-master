@@ -118,6 +118,8 @@ if __name__ == '__main__':
         y_train[i] = sentence_to_one_hot(maxlen_ch, w2v_model, s)
 
     x_train = np.vstack([x_train, x_train])
+    x_train = np.vstack([x_train, x_train])
+    y_train = np.vstack([y_train, y_train])
     y_train = np.vstack([y_train, y_train])
 
     t_corpus_en_filename = 't_corpus.en.txt'
@@ -151,7 +153,7 @@ if __name__ == '__main__':
     output_dim = y_train.shape[2]
     depth = 4
 
-    att_model = train_test((x_train, y_train), (x_test, y_test), 1000, input_dim, input_length, hidden_dim,
+    att_model = train_test((x_train, y_train), (x_test, y_test), 1500, input_dim, input_length, hidden_dim,
                            output_length,
                            output_dim, depth)
 
