@@ -4,7 +4,7 @@ from itertools import tee
 
 from gensim.models import Word2Vec
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename=(__name__ + '.log'), level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
 

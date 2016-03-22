@@ -11,25 +11,46 @@ from seq2seq.models import AttentionSeq2seq
 import w2v
 
 logging.basicConfig(filename=(__name__ + '.log'), level=logging.INFO)
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 EOS_SYMBOL = '$$$'
 UKN_TOKEN = '###'
+
+
+def word_to_one_hot(w2vm, word):
+    v = np.zeros(len(w2vm.vocab))
+    v[w2vm.vocab[word].index] = 1.0
+    return v
+
+
+def one_hot_to_word(w2vm, word_vec):
+    return w2vm.index2word[np.argmax(word_vec)]
+
+
+def sentence_to_one_hot(maxlen, w2vm, sentence):
+    s = np.full((maxlen, len(w2v_model.vocab)), word_to_one_hot(w2vm, EOS_SYMBOL))
+    for i, t in enumerate(sentence):
+        s[i] = word_to_one_hot(w2vm, t)
+    return s
+
+
+def one_hot_to_sentence(w2vm, sentence_vec):
+    return [one_hot_to_word(w2vm, wv) for wv in sentence_vec]
 
 
 def train_test(train_pair, test_pair, nb_epoch, input_dim, input_length, hidden_dim, output_length, output_dim, depth):
     (x_train, y_train) = train_pair
     (x_test, y_test) = test_pair
 
-    _logger.info('x_train shape: {}'.format(x_train.shape))
-    _logger.info('y_train shape: {}'.format(y_train.shape))
-    _logger.info('x_test shape: {}'.format(x_test.shape))
-    _logger.info('y_test shape: {}'.format(y_test.shape))
+    logger.info('x_train shape: {}'.format(x_train.shape))
+    logger.info('y_train shape: {}'.format(y_train.shape))
+    logger.info('x_test shape: {}'.format(x_test.shape))
+    logger.info('y_test shape: {}'.format(y_test.shape))
 
     ts0 = time.time()
     ts1 = time.time()
 
-    _logger.info('Building model...')
+    logger.info('Building model...')
     model = AttentionSeq2seq(input_dim=input_dim,
                              input_length=input_length,
                              hidden_dim=hidden_dim,
@@ -38,36 +59,24 @@ def train_test(train_pair, test_pair, nb_epoch, input_dim, input_length, hidden_
                              depth=depth)
     model.add(Activation('softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-    _logger.info('Done building model ({:.1f} minutes).'.format((time.time() - ts1) / 60))
+    logger.info('Done building model ({:.1f} minutes).'.format((time.time() - ts1) / 60))
 
     ts1 = time.time()
 
-    _logger.info('Training...')
+    logger.info('Training...')
     model.fit(x_train, y_train, nb_epoch=nb_epoch, show_accuracy=True)
-    _logger.info('Done training ({:.1f} minutes).'.format((time.time() - ts1) / 60))
+    logger.info('Done training ({:.1f} minutes).'.format((time.time() - ts1) / 60))
 
     ts1 = time.time()
 
-    _logger.info('Evaluating...')
+    logger.info('Evaluating...')
     objective_score = model.evaluate(x_test, y_test)
-    _logger.info('Objective score = {}'.format(objective_score))
-    _logger.info('Done evaluation ({:.1f} minutes)'.format((time.time() - ts1) / 60))
+    logger.info('Objective score = {}'.format(objective_score))
+    logger.info('Done evaluation ({:.1f} minutes)'.format((time.time() - ts1) / 60))
 
-    _logger.info('Predicted:\n{}\nGround truth:\n{}'.format(model.predict(x_test), y_test))
-    _logger.info('Total time elapsed: {:.1f} minutes.'.format((time.time() - ts0) / 60))
+    logger.info('Total time elapsed: {:.1f} minutes.'.format((time.time() - ts0) / 60))
 
-
-def word_one_hot(w2vm, word):
-    v = np.zeros(len(w2vm.vocab))
-    v[w2vm.vocab[word].index] = 1.0
-    return v
-
-
-def sentence_one_hot(maxlen, w2vm, sentence):
-    s = np.full((maxlen, len(w2v_model.vocab)), word_one_hot(w2vm, EOS_SYMBOL))
-    for i, t in enumerate(sentence):
-        s[i] = word_one_hot(w2vm, t)
-    return s
+    return model
 
 
 if __name__ == '__main__':
@@ -102,25 +111,11 @@ if __name__ == '__main__':
 
     x_train = np.empty((len(sentences_en), maxlen_en, len(w2v_model.vocab)))
     for i, s in enumerate(sentences_en):
-        x_train[i] = sentence_one_hot(maxlen_en, w2v_model, s)
+        x_train[i] = sentence_to_one_hot(maxlen_en, w2v_model, s)
 
     y_train = np.empty((len(sentences_ch), maxlen_ch, len(w2v_model.vocab)))
     for i, s in enumerate(sentences_ch):
-        y_train[i] = sentence_one_hot(maxlen_ch, w2v_model, s)
-
-    '''x_train = np.asarray([
-        [[0, 1], [0, 1], [0, 1]],
-        [[0, 1], [0, 1], [1, 0]],
-        [[0, 1], [1, 0], [0, 1]],
-        [[1, 0], [0, 1], [1, 0]]
-    ])
-
-    y_train = np.asarray([
-        [[0, 1], [1, 0], [1, 0]],
-        [[0, 1], [1, 0], [0, 1]],
-        [[1, 0], [0, 1], [0, 1]],
-        [[1, 0], [1, 0], [0, 1]]
-    ])'''
+        y_train[i] = sentence_to_one_hot(maxlen_ch, w2v_model, s)
 
     x_test = x_train.copy()
     y_test = y_train.copy()
@@ -135,5 +130,11 @@ if __name__ == '__main__':
     output_dim = y_train.shape[2]
     depth = 4
 
-    train_test((x_train, y_train), (x_test, y_test), 1000, input_dim, input_length, hidden_dim, output_length,
-               output_dim, depth)
+    att_model = train_test((x_train, y_train), (x_test, y_test), 1000, input_dim, input_length, hidden_dim,
+                           output_length,
+                           output_dim, depth)
+
+    logger.info('Prediction and ground truth:')
+    for p, g in zip(att_model.predict(x_test), y_test):
+        logger.info('[P] {}'.format(one_hot_to_sentence(w2v_model, p)))
+        logger.info('[G] {}'.format(one_hot_to_sentence(w2v_model, g)))
