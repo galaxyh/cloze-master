@@ -117,11 +117,32 @@ if __name__ == '__main__':
     for i, s in enumerate(sentences_ch):
         y_train[i] = sentence_to_one_hot(maxlen_ch, w2v_model, s)
 
-    x_test = x_train.copy()
-    y_test = y_train.copy()
-
     x_train = np.vstack([x_train, x_train])
     y_train = np.vstack([y_train, y_train])
+
+    t_corpus_en_filename = 't_corpus.en.txt'
+    t_corpus_ch_filename = 't_corpus.ch.txt'
+    t_sentences_en = []
+    t_sentences_ch = []
+    for line in codecs.open(t_corpus_en_filename, 'r', 'utf-8'):
+        tokens = line.split()
+        tokens.append(EOS_SYMBOL)
+        t_sentences_en.append(tokens)
+    t_maxlen_en = len(max(t_sentences_en, key=len))
+
+    for line in codecs.open(t_corpus_ch_filename, 'r', 'utf-8'):
+        tokens = line.split()
+        tokens.append(EOS_SYMBOL)
+        t_sentences_ch.append(tokens)
+    t_maxlen_ch = len(max(t_sentences_ch, key=len))
+
+    x_test = np.empty((len(t_sentences_en), t_maxlen_en, len(w2v_model.vocab)))
+    for i, s in enumerate(t_sentences_en):
+        x_test[i] = sentence_to_one_hot(t_maxlen_en, w2v_model, s)
+
+    y_test = np.empty((len(t_sentences_ch), t_maxlen_ch, len(w2v_model.vocab)))
+    for i, s in enumerate(t_sentences_ch):
+        y_test[i] = sentence_to_one_hot(t_maxlen_ch, w2v_model, s)
 
     input_dim = x_train.shape[2]
     input_length = x_train.shape[1]
