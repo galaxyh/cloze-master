@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     input_dim = x_train.shape[2]
     input_length = x_train.shape[1]
-    hidden_dim = 100
+    hidden_dim = 300
     output_length = y_train.shape[1]
     output_dim = y_train.shape[2]
     depth = 4
